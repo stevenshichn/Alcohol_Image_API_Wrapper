@@ -3,13 +3,13 @@
 import traceback
 from flask import Flask, request, jsonify
 from PIL import Image, ExifTags
-from keras.preprocessing.image import img_to_array
-from keras.applications import imagenet_utils
 from keras.models import model_from_json
 import numpy as np
 import tensorflow as tf
 from scipy.misc import imresize
-
+from s3_helper import S3_Operation
+import interactive_helper as helper
+import os
 
 IMAGE_WIDTH = 224
 IMAGE_HEIGHT = 224
@@ -17,7 +17,16 @@ model_file_path = 'alcohol_cnn.h5'
 model_weight_file_path = 'model_vgg16.h5'
 model_json_file_path = 'model_vgg16.json'
 
+
+BUCKET_NAME = 'image-recognition-models'
+MODEL_FILE_NAME = 'model_vgg16.h5'
+MODEL_JSON_FILE_NAME = 'model_vgg16.json'
+
 app = Flask(__name__)
+
+def download_file_from_s3(key, use_exist = True):
+    s3_operation = S3_Operation()
+    s3_operation.download_file(BUCKET_NAME, key, key, use_exist)
 
 data = None # to store json string from json file
 with open(model_json_file_path, encoding='utf-8') as weight_file:
@@ -73,4 +82,8 @@ def rotate_by_exif(image):
 
    
 if __name__ == "__main__":
-    app.run(debug = True)
+    update_model = helper.query_yes_no('Do you want to update the model files?')
+    download_file_from_s3(model_json_file_path, not update_model)
+    download_file_from_s3(model_weight_file_path, not update_model)
+    app.run()
+    
