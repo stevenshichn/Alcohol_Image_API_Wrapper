@@ -1,8 +1,8 @@
 from boto.s3.connection import S3Connection
 import os
 
-AWS_ACCESS_KEY = 'AKIAJN7PXTJVNYDVS4HA'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = '<access key>'
+AWS_SECRET_KEY = '<secret key>'
 
 
 class S3_Operation(object):
