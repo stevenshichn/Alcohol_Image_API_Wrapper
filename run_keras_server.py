@@ -28,14 +28,6 @@ def download_file_from_s3(key, use_exist = True):
     s3_operation = S3_Operation()
     s3_operation.download_file(BUCKET_NAME, key, key, use_exist)
 
-data = None # to store json string from json file
-with open(model_json_file_path, encoding='utf-8') as weight_file:
-    data = weight_file.read()
-
-graph = tf.get_default_graph()
-model = model_from_json(data)
-model.load_weights(model_weight_file_path)
-
 @app.route("/predict", methods=["POST"])
 def predict_image():
     #Preprocess the image so that it matches the training input
@@ -85,5 +77,12 @@ if __name__ == "__main__":
     update_model = helper.query_yes_no('Do you want to update the model files?')
     download_file_from_s3(model_json_file_path, not update_model)
     download_file_from_s3(model_weight_file_path, not update_model)
-    app.run()
     
+    data = None # to store json string from json file
+    with open(model_json_file_path, encoding='utf-8') as weight_file:
+        data = weight_file.read()
+
+    graph = tf.get_default_graph()
+    model = model_from_json(data)
+    model.load_weights(model_weight_file_path)
+    app.run()
